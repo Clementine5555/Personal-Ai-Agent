@@ -1,10 +1,3 @@
-// =============================================================
-// lib/screens/chat_screen.dart — Halaman utama chat
-//
-// Ini adalah layar utama aplikasi: menampilkan daftar pesan,
-// input text, dan mengurus pengiriman pesan ke backend.
-// =============================================================
-
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../models/conversation.dart';
@@ -22,20 +15,20 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _inputController = TextEditingController();
-  // ScrollController: untuk otomatis scroll ke bawah saat ada pesan baru
+
   final _scrollController = ScrollController();
 
-  List<Message> _messages = [];           // Pesan di conversation aktif
-  List<Conversation> _conversations = []; // Sidebar: daftar semua conversation
-  String? _activeConversationId;          // ID conversation yang sedang dibuka
-  bool _isLoading = false;                // Sedang kirim pesan?
-  bool _isLoadingHistory = false;         // Sedang load riwayat?
+  List<Message> _messages = [];           
+  List<Conversation> _conversations = []; 
+  String? _activeConversationId;          
+  bool _isLoading = false;                
+  bool _isLoadingHistory = false;         
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadConversations(); // Load daftar conversation saat halaman pertama dibuka
+    _loadConversations(); 
   }
 
   @override
@@ -45,18 +38,16 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  // Load daftar semua conversation dari backend
   Future<void> _loadConversations() async {
     try {
       final convs = await ApiService.instance.getConversations();
       setState(() => _conversations = convs);
     } catch (e) {
-      // Tidak perlu tampilkan error — sidebar hanya fitur tambahan
+
       debugPrint('Gagal load conversations: $e');
     }
   }
 
-  // Buka conversation tertentu dan load pesannya
   Future<void> _openConversation(Conversation conv) async {
     setState(() {
       _activeConversationId = conv.id;
@@ -75,7 +66,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Mulai conversation baru (reset state)
   void _newConversation() {
     setState(() {
       _messages = [];
@@ -84,12 +74,10 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // Kirim pesan — fungsi utama
   Future<void> _sendMessage() async {
     final text = _inputController.text.trim();
     if (text.isEmpty || _isLoading) return;
 
-    // Tampilkan pesan user di UI dulu (optimistic update)
     final userMessage = Message.temporary(
       role: MessageRole.user,
       content: text,
@@ -105,19 +93,17 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
 
     try {
-      // Kirim ke backend
+
       final result = await ApiService.instance.sendMessage(
         message: text,
         conversationId: _activeConversationId,
       );
 
-      // Kalau ini pesan pertama (conversation baru), simpan ID-nya
       if (_activeConversationId == null) {
         setState(() => _activeConversationId = result['conversationId']);
-        _loadConversations(); // Refresh sidebar
+        _loadConversations(); 
       }
 
-      // Tambahkan jawaban AI ke daftar pesan
       final aiMessage = Message.temporary(
         role: MessageRole.assistant,
         content: result['reply'] ?? 'Tidak ada balasan',
@@ -128,16 +114,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
     } catch (e) {
       setState(() => _errorMessage = 'Gagal kirim pesan: ${e.toString()}');
-      // Hapus pesan user yang tadi ditambahkan (karena gagal)
+
       setState(() => _messages.removeLast());
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  // Scroll otomatis ke pesan terbawah
   void _scrollToBottom() {
-    // Jadwalkan scroll setelah frame berikutnya (setelah UI dirender)
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -149,7 +134,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // Logout
   Future<void> _handleLogout() async {
     await AuthService.instance.signOut();
     if (mounted) {
@@ -162,32 +146,30 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Deteksi layar lebar (Windows/tablet) untuk tampilkan sidebar
+
     final isWideScreen = MediaQuery.of(context).size.width > 700;
 
     return Scaffold(
-      // Sidebar hanya muncul di layar lebar (Windows)
+
       drawer: isWideScreen ? null : _buildDrawer(theme),
       body: Row(
         children: [
-          // Sidebar permanen di layar lebar
+
           if (isWideScreen) _buildSidebar(theme),
 
-          // Area chat utama
           Expanded(child: _buildChatArea(theme, isWideScreen)),
         ],
       ),
     );
   }
 
-  // Sidebar: daftar conversation
   Widget _buildSidebar(ThemeData theme) {
     return Container(
       width: 260,
       color: theme.colorScheme.surfaceContainer,
       child: Column(
         children: [
-          // Header sidebar
+
           SafeArea(
             bottom: false,
             child: Padding(
@@ -221,7 +203,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const Divider(height: 1),
 
-          // Daftar conversation
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -254,7 +235,6 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          // Tombol logout di bawah sidebar
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.all(12),
@@ -274,16 +254,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // Drawer (untuk mobile — diakses dengan swipe dari kiri)
   Widget _buildDrawer(ThemeData theme) {
     return Drawer(child: _buildSidebar(theme));
   }
 
-  // Area chat utama
   Widget _buildChatArea(ThemeData theme, bool isWideScreen) {
     return Column(
       children: [
-        // AppBar
+
         AppBar(
           automaticallyImplyLeading: !isWideScreen,
           title: Text(
@@ -308,7 +286,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
 
-        // Pesan error (kalau ada)
         if (_errorMessage != null)
           MaterialBanner(
             content: Text(_errorMessage!),
@@ -321,18 +298,17 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
 
-        // Daftar pesan
         Expanded(
           child: _isLoadingHistory
               ? const Center(child: CircularProgressIndicator())
               : _messages.isEmpty
-                  ? _buildEmptyState(theme) // Tampilan saat belum ada pesan
+                  ? _buildEmptyState(theme) 
                   : ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.only(top: 12, bottom: 8),
                       itemCount: _messages.length + (_isLoading ? 1 : 0),
                       itemBuilder: (_, i) {
-                        // Item terakhir adalah typing indicator saat loading
+
                         if (i == _messages.length) {
                           return const TypingIndicator();
                         }
@@ -341,13 +317,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
         ),
 
-        // Input bar
         _buildInputBar(theme),
       ],
     );
   }
 
-  // Tampilan saat belum ada pesan
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
@@ -370,7 +344,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // Input bar bawah layar
   Widget _buildInputBar(ThemeData theme) {
     return SafeArea(
       top: false,
@@ -383,12 +356,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: Row(
           children: [
-            // TextField input pesan
+
             Expanded(
               child: TextField(
                 controller: _inputController,
                 minLines: 1,
-                maxLines: 5, // Bisa multi-baris
+                maxLines: 5, 
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
@@ -408,7 +381,6 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(width: 8),
 
-            // Tombol kirim
             Material(
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(24),

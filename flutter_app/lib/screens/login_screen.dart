@@ -1,10 +1,3 @@
-// =============================================================
-// lib/screens/login_screen.dart — Halaman Login
-//
-// 💡 StatefulWidget: halaman ini punya state (loading, error message,
-//    nilai di text field) yang bisa berubah saat user berinteraksi.
-// =============================================================
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
@@ -18,18 +11,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Controller: untuk membaca nilai yang diketik user di TextField
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Kunci untuk form validation
   final _formKey = GlobalKey<FormState>();
 
-  bool _isLoading = false;    // Apakah sedang proses login?
-  String? _errorMessage;      // Pesan error yang ditampilkan ke user
-  bool _obscurePassword = true; // Apakah password disembunyikan?
+  bool _isLoading = false;    
+  String? _errorMessage;      
+  bool _obscurePassword = true; 
 
-  // Dipanggil saat widget dihapus dari tree — penting untuk cleanup!
   @override
   void dispose() {
     _emailController.dispose();
@@ -37,12 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Fungsi login — dipanggil saat tombol "Masuk" ditekan
   Future<void> _handleLogin() async {
-    // Validasi form dulu sebelum kirim request
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // setState(): ubah state → Flutter otomatis rebuild UI
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -54,20 +43,18 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
-      // Login berhasil → pindah ke ChatScreen
-      // mounted: cek apakah widget masih ada di tree (keamanan async)
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const ChatScreen()),
         );
       }
     } on AuthException catch (e) {
-      // Error dari Supabase Auth
+
       setState(() => _errorMessage = e.message);
     } catch (e) {
       setState(() => _errorMessage = 'Login gagal. Periksa koneksi internet.');
     } finally {
-      // 'finally' selalu dijalankan, apapun hasilnya
+
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -79,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: Container(
-        // Background gradient
+
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -95,12 +82,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              // Batasi lebar form supaya tampil bagus di Windows (layar lebar)
+
               constraints: const BoxConstraints(maxWidth: 400),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo / Icon
+
                   Container(
                     width: 80,
                     height: 80,
@@ -137,12 +124,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Form login
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Input email
+
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -151,15 +137,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Email wajib diisi';
                             if (!v.contains('@')) return 'Format email tidak valid';
-                            return null; // null = valid
+                            return null; 
                           },
                         ),
                         const SizedBox(height: 16),
 
-                        // Input password
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: _obscurePassword, // Sembunyikan karakter
+                          obscureText: _obscurePassword, 
                           style: const TextStyle(color: Colors.white),
                           decoration: _inputDecoration(
                             'Password',
@@ -185,7 +170,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        // Pesan error (hanya tampil kalau ada error)
                         if (_errorMessage != null)
                           Container(
                             padding: const EdgeInsets.all(12),
@@ -212,7 +196,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         const SizedBox(height: 24),
 
-                        // Tombol Masuk
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -255,7 +238,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Helper: membuat InputDecoration yang konsisten untuk semua TextField
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,

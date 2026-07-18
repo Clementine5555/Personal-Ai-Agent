@@ -1,15 +1,9 @@
-// =============================================================
-// src/routes/conversations.js — Route untuk kelola conversations
-// =============================================================
-
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { getConversations, getMessages } from '../services/supabase.js';
 
 const router = Router();
 
-// GET /api/conversations
-// Ambil semua conversation milik user yang sedang login
 router.get('/', authMiddleware, async (req, res) => {
     try {
         const conversations = await getConversations(req.user.id);
@@ -20,8 +14,6 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-// GET /api/conversations/:id/messages
-// Ambil semua pesan dalam conversation tertentu
 router.get('/:id/messages', authMiddleware, async (req, res) => {
     try {
         const messages = await getMessages(req.params.id);

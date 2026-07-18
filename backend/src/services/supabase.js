@@ -1,15 +1,5 @@
-// =============================================================
-// src/services/supabase.js — Koneksi dan operasi ke Supabase
-//
-// File ini mengurus semua interaksi dengan database:
-// menyimpan pesan, membuat conversation baru, dll.
-// =============================================================
-
 import { createClient } from '@supabase/supabase-js';
 
-// Buat Supabase client dengan SERVICE_ROLE key
-// SERVICE_ROLE key bisa bypass Row Level Security — cocok untuk backend
-// JANGAN pakai ini di client-side / Flutter!
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -37,7 +27,7 @@ export async function createConversation(userId, title = 'New Chat') {
         .from('conversations')
         .insert({ user_id: userId, title })
         .select()
-        .single();  // .single() = ambil 1 hasil saja (bukan array)
+        .single();  
 
     if (error) throw new Error(`Gagal buat conversation: ${error.message}`);
     return data;
@@ -50,8 +40,8 @@ export async function getConversations(userId) {
     const { data, error } = await supabase
         .from('conversations')
         .select('*')
-        .eq('user_id', userId)          // Filter: hanya milik user ini
-        .order('updated_at', { ascending: false }); // Terbaru di atas
+        .eq('user_id', userId)          
+        .order('updated_at', { ascending: false }); 
 
     if (error) throw new Error(`Gagal ambil conversations: ${error.message}`);
     return data;
@@ -65,7 +55,7 @@ export async function getMessages(conversationId) {
         .from('messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true }); // Dari pesan lama ke baru
+        .order('created_at', { ascending: true }); 
 
     if (error) throw new Error(`Gagal ambil messages: ${error.message}`);
     return data;
@@ -94,7 +84,7 @@ export async function saveMessage(conversationId, role, content) {
 export async function updateConversationTitle(conversationId, title) {
     const { error } = await supabase
         .from('conversations')
-        .update({ title: title.substring(0, 100) }) // Max 100 karakter
+        .update({ title: title.substring(0, 100) }) 
         .eq('id', conversationId);
 
     if (error) console.warn('Gagal update title:', error.message);

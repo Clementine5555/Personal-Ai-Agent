@@ -1,7 +1,3 @@
-// =============================================================
-// lib/models/conversation.dart — Model untuk sesi percakapan
-// =============================================================
-
 class Conversation {
   final String id;
   final String title;

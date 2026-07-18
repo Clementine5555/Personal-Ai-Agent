@@ -1,10 +1,3 @@
-// =============================================================
-// lib/widgets/chat_bubble.dart — Widget bubble chat
-//
-// 💡 StatelessWidget: widget yang isinya ditentukan hanya dari
-//    parameter yang diberikan saat dibuat — tidak ada state internal.
-// =============================================================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/message.dart';
@@ -22,12 +15,12 @@ class ChatBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Row(
-        // Pesan user di kanan, AI di kiri
+
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar AI (hanya tampil untuk pesan AI)
+
           if (!isUser) ...[
             CircleAvatar(
               radius: 16,
@@ -41,12 +34,11 @@ class ChatBubble extends StatelessWidget {
             const SizedBox(width: 8),
           ],
 
-          // Bubble isi pesan
           Flexible(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                // Warna berbeda untuk user vs AI
+
                 color: isUser
                     ? theme.colorScheme.primary
                     : theme.colorScheme.surfaceContainerHigh,
@@ -55,14 +47,13 @@ class ChatBubble extends StatelessWidget {
                   topRight: const Radius.circular(18),
                   bottomLeft: isUser
                       ? const Radius.circular(18)
-                      : const Radius.circular(4), // Sudut lancip di sisi avatar
+                      : const Radius.circular(4), 
                   bottomRight: isUser
                       ? const Radius.circular(4)
                       : const Radius.circular(18),
                 ),
               ),
-              // Render markdown untuk pesan AI (bold, list, code, dll)
-              // Pesan user ditampilkan sebagai teks biasa
+
               child: isUser
                   ? Text(
                       message.content,
@@ -92,7 +83,6 @@ class ChatBubble extends StatelessWidget {
             ),
           ),
 
-          // Spacer untuk pesan AI (supaya tidak mentok kanan)
           if (!isUser) const SizedBox(width: 40),
           if (isUser) ...[
             const SizedBox(width: 8),
@@ -112,7 +102,6 @@ class ChatBubble extends StatelessWidget {
   }
 }
 
-// Widget loading indicator — muncul saat menunggu jawaban AI
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
 
@@ -120,8 +109,6 @@ class TypingIndicator extends StatefulWidget {
   State<TypingIndicator> createState() => _TypingIndicatorState();
 }
 
-// 💡 StatefulWidget + State: widget yang bisa berubah (animasi, data dinamis).
-//    State tersimpan di class _TypingIndicatorState yang terpisah.
 class _TypingIndicatorState extends State<TypingIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
@@ -130,18 +117,18 @@ class _TypingIndicatorState extends State<TypingIndicator>
   @override
   void initState() {
     super.initState();
-    // Animasi fade in-out berulang untuk indikator "AI sedang mengetik"
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
-    )..repeat(reverse: true); // repeat(reverse: true) = maju-mundur terus
+    )..repeat(reverse: true); 
 
     _animation = Tween<double>(begin: 0.3, end: 1.0).animate(_controller);
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Penting! Hentikan animasi saat widget dihapus
+    _controller.dispose(); 
     super.dispose();
   }
 
@@ -168,7 +155,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
               color: theme.colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(18),
             ),
-            // FadeTransition: animasikan opacity berdasarkan _animation
+
             child: FadeTransition(
               opacity: _animation,
               child: Row(
